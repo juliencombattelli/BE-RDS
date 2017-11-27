@@ -1,4 +1,11 @@
-#!/usr/bin/ipython
+#!/usr/bin/python
+
+# Typical header of a Python script using Pinocchio
+from pinocchio.utils import *
+from pinocchio.explog import exp,log
+from numpy.linalg import pinv,norm
+import pinocchio as se3
+import gepetto.corbaserver
 
 # Example of a class Display that connect to Gepetto-viewer and implement a
 # 'place' method to set the position/rotation of a 3D visual object in a scene.
