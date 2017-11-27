@@ -6,6 +6,7 @@ from numpy.linalg import pinv,norm
 import pinocchio as se3
 import gepetto.corbaserver
 from display import Display
+import time
 
 class Visual:
     '''
@@ -41,11 +42,11 @@ class Robot:
         self.viewer = Display()
         self.visuals = []
         self.model = se3.Model.BuildEmptyModel()
-        self.createArm7DOF()
+        self.createLeg6DOF()
         self.data = self.model.createData()
-        self.q0 = zero(7)
+        self.q0 = zero(6)
 
-    def createArm7DOF(self,rootId=0,prefix='',jointPlacement=None):
+    def createLeg6DOF(self,rootId=0,prefix='',jointPlacement=None):
         color   = [red,green,blue,transparency] = [1,1,0.78,1.0]
         colorred = [1.0,0.0,0.0,1.0]
 
@@ -105,18 +106,7 @@ class Robot:
         self.viewer.viewer.gui.addSphere('world/'+prefix+'sphere6', sphereSize,colorred)
         self.visuals.append( Visual('world/'+prefix+'sphere6',jointId,se3.SE3.Identity()) )
 	self.viewer.viewer.gui.addBox('world/'+prefix+'foot', .5,.1,.1,color)
-        self.visuals.append( Visual('world/'+prefix+'foot',jointId,se3.SE3(eye(3),np.matrix([.3,0.,0.]))))
-	'''
-        name               = prefix+"wrist3"
-        jointName,bodyName = [name+"_joint",name+"_body"]
-        jointPlacement     = se3.SE3.Identity()
-        jointId = self.model.addJoint(jointId,se3.JointModelRX(),jointPlacement,jointName)
-        self.model.appendBodyToJoint(jointId,se3.Inertia.Random(),se3.SE3.Identity())
-        self.viewer.viewer.gui.addSphere('world/'+prefix+'sphere7', 0.3,colorred)
-        self.visuals.append( Visual('world/'+prefix+'sphere7',jointId,se3.SE3.Identity()) )
-        self.viewer.viewer.gui.addBox('world/'+prefix+'finger', .05,.05,.4,color)
-        self.visuals.append( Visual('world/'+prefix+'finger',jointId,se3.SE3(eye(3),np.matrix([0.,0.,.5]))))
-	'''
+        self.visuals.append( Visual('world/'+prefix+'foot',jointId,se3.SE3(eye(3),np.matrix([-.3,0.,0.]))))
 
     def display(self,q):
         se3.forwardKinematics(self.model,self.data,q)
@@ -127,3 +117,17 @@ class Robot:
 
 robot = Robot()
 robot.display(robot.q0)
+q = robot.q0
+
+for j in range(0,10):
+	for i in range(0, 90):
+		q[1] = q[1] + np.radians(1)
+		q[3] = q[3] - np.radians(1)
+		robot.display(q)
+		time.sleep(0.01)
+	for i in range(0, 90):
+		q[1] = q[1] - np.radians(1)
+		q[3] = q[3] + np.radians(1)
+		robot.display(q)
+		time.sleep(0.01)
+
