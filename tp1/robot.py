@@ -45,6 +45,8 @@ class Robot:
         self.createLeg6DOF()
         self.data = self.model.createData()
         self.q0 = zero(6)
+	self.q = self.q0
+	self.trans = se3.SE3(eye(3),np.matrix([-0.7,0.,-.05]))
 
     def createLeg6DOF(self,rootId=0,prefix='',jointPlacement=None):
         color   = [red,green,blue,transparency] = [1,1,0.78,1.0]
@@ -109,12 +111,13 @@ class Robot:
         self.visuals.append( Visual('world/'+prefix+'foot',jointId,se3.SE3(eye(3),np.matrix([-.3,0.,0.]))))
 
     def display(self,q):
+	self.q = q
         se3.forwardKinematics(self.model,self.data,q)
         for visual in self.visuals:
             visual.place( self.viewer,self.data.oMi[visual.jointParent] )
         self.viewer.viewer.gui.refresh()
 
-
+'''
 robot = Robot()
 robot.display(robot.q0)
 q = robot.q0
@@ -130,4 +133,5 @@ for j in range(0,10):
 		q[3] = q[3] + np.radians(1)
 		robot.display(q)
 		time.sleep(0.01)
+'''
 
