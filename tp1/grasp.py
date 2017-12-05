@@ -17,7 +17,6 @@ def cost(q):
 	pu = robot.data.oMi[6] * robot.trans
 	p = pu.translation
 	pdes = se3.SE3(eye(3),np.matrix([-0.5,0.,-1.-i*0.1])).translation
-	print str(i) + " " + str(pdes)
 	return np.sqrt(np.square(p[0] - pdes[0]) + np.square(p[1] - pdes[1]) + np.square(p[2] - pdes[2]))
 
 def constraint_eq(x):
