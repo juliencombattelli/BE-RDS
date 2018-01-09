@@ -42,11 +42,41 @@ class Robot:
         self.viewer = Display()
         self.visuals = []
         self.model = se3.Model.BuildEmptyModel()
-        self.createLeg6DOF()
+	self.createBottom(0, '' , se3.SE3(eye(3),np.matrix([0.0,0.0,2.0])))
         self.data = self.model.createData()
-        self.q0 = zero(6)
+        self.q0 = zero(14)
 	self.q = self.q0
 	self.trans = se3.SE3(eye(3),np.matrix([-0.7,0.,-.05]))
+
+    def createBottom(self, rootId=0, prefix='', jointPlacement=None):
+	color   = [red,green,blue,transparency] = [1,1,0.78,1.0]
+        colorred = [1.0,0.0,0.0,1.0]
+
+        jointId = rootId
+
+	sphereSize = .15
+
+	name               = prefix+"pelvis1"
+        jointName,bodyName = [name+"_joint",name+"_body"]
+        jointPlacement     = jointPlacement if jointPlacement!=None else se3.SE3.Identity()
+        jointId = self.model.addJoint(jointId,se3.JointModelPX(),jointPlacement,jointName)
+        self.model.appendBodyToJoint(jointId,se3.Inertia.Random(),se3.SE3.Identity())
+
+	name               = prefix+"pelvis2"
+        jointName,bodyName = [name+"_joint",name+"_body"]
+        jointPlacement     = se3.SE3.Identity()
+        jointId = self.model.addJoint(jointId,se3.JointModelPY(),jointPlacement,jointName)
+        self.model.appendBodyToJoint(jointId,se3.Inertia.Random(),se3.SE3.Identity())
+	self.viewer.viewer.gui.addSphere('world/'+prefix+'sphere1', sphereSize ,colorred)
+        self.visuals.append( Visual('world/'+prefix+'sphere1',jointId,se3.SE3.Identity()) )
+	self.viewer.viewer.gui.addBox('world/'+prefix+'pelvis', 1.,1.,.1,color)
+        self.visuals.append( Visual('world/'+prefix+'pelvis',jointId,se3.SE3(eye(3),np.matrix([0,0,0.]))))
+
+	print(jointId)
+	self.createLeg6DOF(jointId, 'left', se3.SE3(eye(3),np.matrix([0.0,0.5,0.0])))
+	print(jointId)
+	self.createLeg6DOF(jointId, 'right', se3.SE3(eye(3),np.matrix([0.0,-0.5,0.0])))
+	print(jointId)
 
     def createLeg6DOF(self,rootId=0,prefix='',jointPlacement=None):
         color   = [red,green,blue,transparency] = [1,1,0.78,1.0]
@@ -61,24 +91,20 @@ class Robot:
         jointPlacement     = jointPlacement if jointPlacement!=None else se3.SE3.Identity()
         jointId = self.model.addJoint(jointId,se3.JointModelRX(),jointPlacement,jointName)
         self.model.appendBodyToJoint(jointId,se3.Inertia.Random(),se3.SE3.Identity())
-        #self.viewer.viewer.gui.addSphere('world/'+prefix+'sphere1', 0.3,colorred)
-        self.visuals.append( Visual('world/'+prefix+'sphere1',jointId,se3.SE3.Identity()) )
 
         name               = prefix+"hip2"
         jointName,bodyName = [name+"_joint",name+"_body"]
         jointPlacement     = se3.SE3.Identity()
         jointId = self.model.addJoint(jointId,se3.JointModelRY(),jointPlacement,jointName)
         self.model.appendBodyToJoint(jointId,se3.Inertia.Random(),se3.SE3.Identity())
-        #self.viewer.viewer.gui.addSphere('world/'+prefix+'sphere2', 0.3,colorred)
-        self.visuals.append( Visual('world/'+prefix+'sphere2',jointId,se3.SE3.Identity()) )
 
         name               = prefix+"hip3"
         jointName,bodyName = [name+"_joint",name+"_body"]
         jointPlacement     = se3.SE3.Identity()
         jointId = self.model.addJoint(jointId,se3.JointModelRZ(),jointPlacement,jointName)
         self.model.appendBodyToJoint(jointId,se3.Inertia.Random(),se3.SE3.Identity())
-        self.viewer.viewer.gui.addSphere('world/'+prefix+'sphere3', sphereSize ,colorred)
-        self.visuals.append( Visual('world/'+prefix+'sphere3',3,se3.SE3.Identity()) )
+        self.viewer.viewer.gui.addSphere('world/'+prefix+'hip', sphereSize ,colorred)
+        self.visuals.append( Visual('world/'+prefix+'hip',jointId,se3.SE3.Identity()) ) #3 => jointId
         self.viewer.viewer.gui.addBox('world/'+prefix+'thigh', .1,.1,.5,color)
         self.visuals.append( Visual('world/'+prefix+'thigh',jointId,se3.SE3(eye(3),np.matrix([0.,0.,-.5]))))
 
@@ -87,8 +113,8 @@ class Robot:
         jointPlacement     = se3.SE3(eye(3),np.matrix( [0,0,-1.0] ))
         jointId = self.model.addJoint(jointId,se3.JointModelRY(),jointPlacement,jointName)
         self.model.appendBodyToJoint(jointId,se3.Inertia.Random(),se3.SE3.Identity())
-        self.viewer.viewer.gui.addSphere('world/'+prefix+'sphere4', sphereSize,colorred)
-        self.visuals.append( Visual('world/'+prefix+'sphere4',jointId,se3.SE3.Identity()) )
+        self.viewer.viewer.gui.addSphere('world/'+prefix+'knee', sphereSize,colorred)
+        self.visuals.append( Visual('world/'+prefix+'knee',jointId,se3.SE3.Identity()) )
         self.viewer.viewer.gui.addBox('world/'+prefix+'calf', .1,.1,.5,color)
         self.visuals.append( Visual('world/'+prefix+'calf',jointId,se3.SE3(eye(3),np.matrix([0.,0.,-.5]))))
 	
@@ -97,16 +123,14 @@ class Robot:
         jointPlacement     = se3.SE3(eye(3),np.matrix( [0,0,-1.0] ))
         jointId = self.model.addJoint(jointId,se3.JointModelRX(),jointPlacement,jointName)
         self.model.appendBodyToJoint(jointId,se3.Inertia.Random(),se3.SE3.Identity())
-        #self.viewer.viewer.gui.addSphere('world/'+prefix+'sphere5', 0.3,colorred)
-        self.visuals.append( Visual('world/'+prefix+'sphere5',jointId,se3.SE3.Identity()) )
 
         name               = prefix+"hankle2"
         jointName,bodyName = [name+"_joint",name+"_body"]
         jointPlacement     = se3.SE3.Identity()
         jointId = self.model.addJoint(jointId,se3.JointModelRY(),jointPlacement,jointName)
         self.model.appendBodyToJoint(jointId,se3.Inertia.Random(),se3.SE3.Identity())
-        self.viewer.viewer.gui.addSphere('world/'+prefix+'sphere6', sphereSize,colorred)
-        self.visuals.append( Visual('world/'+prefix+'sphere6',jointId,se3.SE3.Identity()) )
+        self.viewer.viewer.gui.addSphere('world/'+prefix+'hankle', sphereSize,colorred)
+        self.visuals.append( Visual('world/'+prefix+'hankle',jointId,se3.SE3.Identity()) )
 	self.viewer.viewer.gui.addBox('world/'+prefix+'foot', .5,.1,.1,color)
         self.visuals.append( Visual('world/'+prefix+'foot',jointId,se3.SE3(eye(3),np.matrix([-.3,0.,0.]))))
 
@@ -117,21 +141,21 @@ class Robot:
             visual.place( self.viewer,self.data.oMi[visual.jointParent] )
         self.viewer.viewer.gui.refresh()
 
-'''
-robot = Robot()
+
+'''robot = Robot()
 robot.display(robot.q0)
 q = robot.q0
 
 for j in range(0,10):
 	for i in range(0, 90):
-		q[1] = q[1] + np.radians(1)
-		q[3] = q[3] - np.radians(1)
+		q[0] = q[0] + np.radians(1)
+		q[1] = q[1] - np.radians(0)
 		robot.display(q)
 		time.sleep(0.01)
 	for i in range(0, 90):
-		q[1] = q[1] - np.radians(1)
-		q[3] = q[3] + np.radians(1)
+		q[0] = q[0] - np.radians(1)
+		q[1] = q[1] + np.radians(0)
 		robot.display(q)
-		time.sleep(0.01)
-'''
+		time.sleep(0.01)'''
+
 

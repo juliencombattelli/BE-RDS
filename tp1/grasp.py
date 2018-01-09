@@ -6,6 +6,7 @@ from scipy.optimize import fmin_bfgs, fmin_slsqp
 import pinocchio as se3
 from pinocchio.utils import *
 import time
+from FootSteps import *
 
 robot = Robot()
 i = 0
@@ -14,9 +15,9 @@ def cost(q):
 	robot.q = q
 	se3.forwardKinematics(robot.model, robot.data,q)
 	#index = robot.indexEffector
-	pu = robot.data.oMi[6] * robot.trans
+	pu = robot.data.oMi[8] * robot.trans
 	p = pu.translation
-	pdes = se3.SE3(eye(3),np.matrix([-0.5,0.,-1.-i*0.1])).translation
+	pdes = se3.SE3(eye(3),np.matrix([-0.5+i*0.01,0. + 0.02*i,2+-1.-i*0.1])).translation
 	return np.sqrt(np.square(p[0] - pdes[0]) + np.square(p[1] - pdes[1]) + np.square(p[2] - pdes[2]))
 
 def constraint_eq(x):
